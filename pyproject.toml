@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hypergryph-profile-cards"
+version = "1.0.0"
+description = "把《明日方舟》《明日方舟：终末地》的玩家数据渲染成可高度自定义的个人主页名片"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "FelixFan-CN" }]
+keywords = ["arknights", "endfield", "skland", "enka", "profile", "readme", "card"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Multimedia :: Graphics",
+]
+dependencies = [
+    "requests>=2.32",
+    "Pillow>=11.3",
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.6"]
+
+[project.urls]
+Homepage = "https://github.com/FelixFan-CN/hypergryph-profile-cards"
+Issues = "https://github.com/FelixFan-CN/hypergryph-profile-cards/issues"
+
+[project.scripts]
+hypergryph-profile-cards = "hypergryph_profile_cards.cli:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+hypergryph_profile_cards = ["theme/presets/*.yaml"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

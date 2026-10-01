@@ -1,0 +1,75 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/FelixFan-CN/hypergryph-profile-cards/main/schema/profile-cards.schema.json
+#
+# 深度自定义示例：把内置预设的外观改到面目全非。
+#
+# 想拿到当前生效的全部配置（含所有默认值）作为起点：
+#   python -m hypergryph_profile_cards --print-config > profile-cards.yaml
+
+version: 1
+
+theme:
+  preset: hoyocard
+
+  # 换成宽一点的竖版画布
+  canvas: { width: 1200, height: 480 }
+
+  # 文字不再纯白，投影更重一些
+  text_color: "#F5F7FA"
+  shadow: { enabled: true, alpha: 220, offset: [2, 2] }
+
+  slots:
+    # 昵称更大、往上挪
+    name:  { x: 48, y: 36, size: 48, bold: true, alpha: 255, empty: "未知" }
+    level: { size: 24, bold: true, alpha: 215, prefix: "Lv.", anchor: name_right, gap: 14, dy: 20 }
+    uid:   { x: 48, y: 104, size: 20, alpha: 180, prefix: "UID: " }
+
+    # 统计行下移并加宽列距
+    stat_value: { x: 48, y: 352, size: 46, bold: true, alpha: 255, column_width: 180 }
+    stat_label: { x: 48, y: 418, size: 24, alpha: 190, column_width: 180 }
+
+  background:
+    # 把主体放在左侧就改成 left
+    anchor: center
+    paths: ["backgrounds/{id}.jpg", "backgrounds/{id}.png"]
+
+  overlays:
+    # 只保留左侧渐隐，关掉底部渐隐
+    bottom_fade: { enabled: false }
+    # 打开毛玻璃，只在左半边生效
+    blur: { enabled: true, radius: 10, region: [0, 0, 780, 480] }
+
+cards:
+  - id: arknights
+    title: 明日方舟
+    uid: "${ARKNIGHTS_UID:-}"
+    output: assets/arknights-card.png
+    options:
+      # 想按「五星及以上」统计就把阈值调成 4
+      six_star_rarity_index: 5
+    stats:
+      - { field: register_days, label: 入职天数, thousands: true }
+      - { field: operator_count, label: 干员总数, suffix: " 名" }
+      - { field: six_star_count, label: 六星干员 }
+      # 组合字段：把两个字段拼成一格
+      - { template: "{ap_current} / {ap_max}", label: 当前理智 }
+      - { field: main_stage, label: 主线进度, format: text }
+
+  - id: endfield
+    title: 明日方舟：终末地
+    uid: "${ENDFIELD_UID:-}"
+    output: assets/endfield-card.png
+    # 这张卡单独覆盖主题，走不同的配色与排版
+    theme_overrides:
+      text_color: "#FFF7E6"
+      overlays:
+        left_fade:
+          enabled: true
+          color: "#1A1206"
+          stops: [[0.0, 0.85], [0.5, 0.45], [0.8, 0.1], [1.0, 0.0]]
+        blur: { enabled: false }
+    stats:
+      - { field: play_days,       label: 苏醒天数 }
+      - { field: world_level,     label: 探索等级 }
+      - { field: character_count, label: 干员总数 }
+      - { field: weapon_count,    label: 武器总数 }
+      - { field: doc_count,       label: 档案总数 }

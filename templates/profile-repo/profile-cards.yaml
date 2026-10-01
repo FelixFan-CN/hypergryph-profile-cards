@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/FelixFan-CN/hypergryph-profile-cards/main/schema/profile-cards.schema.json
+#
+# 最小可用配置：只改 uid 就能跑。
+# 想看完整可配置项（尺寸、坐标、字号、配色、遮罩、字体……）：
+#   python -m hypergryph_profile_cards --print-config
+
+version: 1
+
+cards:
+  # 明日方舟：UID 可留空，会自动从森空岛绑定列表里取默认角色
+  - id: arknights
+    uid: "${ARKNIGHTS_UID:-}"
+    stats:
+      - { field: register_days,   label: 入职天数 }
+      - { field: operator_count,  label: 干员总数 }
+      - { field: six_star_count,  label: 六星干员 }
+      - { field: elite_two_count, label: 精英二 }
+      - { field: skin_count,      label: 皮肤保有 }
+
+  # 终末地：需要填游戏内 9 位 UID
+  - id: endfield
+    uid: "${ENDFIELD_UID:-}"
+    stats:
+      - { field: play_days,       label: 苏醒天数 }
+      - { field: character_count, label: 干员总数 }
+      - { field: weapon_count,    label: 武器总数 }
+      - { field: doc_count,       label: 档案总数 }
+      - { field: world_level,     label: 探索等级 }

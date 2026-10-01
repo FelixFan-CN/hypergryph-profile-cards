@@ -1,0 +1,52 @@
+name: Update profile cards
+
+on:
+  # 每天 20:17 UTC 自动刷新（避开整点拥堵）
+  schedule:
+    - cron: "17 20 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: profile-cards
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: 安装依赖
+        run: pip install -r requirements.txt
+
+      - name: 下载中文字体
+        run: |
+          mkdir -p fonts
+          base="https://github.com/notofonts/noto-cjk/raw/main/Sans/SubsetOTF/SC"
+          curl -fsSL -o fonts/NotoSansSC-Bold.otf "$base/NotoSansSC-Bold.otf"
+          curl -fsSL -o fonts/NotoSansSC-Regular.otf "$base/NotoSansSC-Regular.otf"
+
+      - name: 生成名片
+        env:
+          SKLAND_TOKEN: ${{ secrets.SKLAND_TOKEN }}
+        run: python -m hypergryph_profile_cards
+
+      - name: 提交更新
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets
+          if git diff --cached --quiet; then
+            echo "名片无变化，跳过提交"
+          else
+            git commit -m "chore: update profile cards"
+            git push
+          fi

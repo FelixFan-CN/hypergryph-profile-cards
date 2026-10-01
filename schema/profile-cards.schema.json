@@ -1,0 +1,246 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/FelixFan-CN/hypergryph-profile-cards/schema/profile-cards.schema.json",
+  "title": "hypergryph-profile-cards 配置",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "integer",
+      "description": "配置格式版本，当前为 1"
+    },
+    "theme": {
+      "description": "全局主题。可以只写要覆盖的键，其余继承预设。",
+      "oneOf": [
+        { "type": "string", "description": "预设名，如 hoyocard" },
+        { "$ref": "#/$defs/theme" }
+      ]
+    },
+    "cards": {
+      "type": "array",
+      "minItems": 1,
+      "description": "要生成的卡片，数组顺序即执行顺序",
+      "items": { "$ref": "#/$defs/card" }
+    }
+  },
+  "required": ["cards"],
+  "$defs": {
+    "color": {
+      "oneOf": [
+        { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$", "description": "如 #FFFFFF" },
+        {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 0, "maximum": 255 },
+          "minItems": 3,
+          "maxItems": 3
+        }
+      ]
+    },
+    "stops": {
+      "type": "array",
+      "description": "[位置比例 0-1, 不透明度 0-1] 的列表",
+      "items": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2,
+        "items": { "type": "number" }
+      }
+    },
+    "slot": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number", "description": "左上角横坐标" },
+        "y": { "type": "number", "description": "左上角纵坐标" },
+        "size": { "type": "integer", "description": "字号" },
+        "bold": { "type": "boolean", "description": "是否使用粗体" },
+        "alpha": { "type": "integer", "minimum": 0, "maximum": 255, "description": "文字不透明度" },
+        "prefix": { "type": "string", "description": "前缀，如 \"Lv.\" / \"UID: \"" },
+        "empty": { "type": "string", "description": "取不到值时的兜底文案" },
+        "anchor": {
+          "type": ["string", "null"],
+          "enum": [null, "name_right"],
+          "description": "name_right 表示紧跟昵称右侧"
+        },
+        "gap": { "type": "number", "description": "anchor 为 name_right 时的水平间距" },
+        "dy": { "type": "number", "description": "anchor 为 name_right 时相对昵称的纵向偏移" },
+        "column_width": { "type": ["number", "null"], "description": "仅统计列使用：每列宽度" }
+      }
+    },
+    "theme": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "preset": { "type": "string", "description": "基于哪个内置预设增量覆盖" },
+        "canvas": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "width": { "type": "integer", "minimum": 1 },
+            "height": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "text_color": { "$ref": "#/$defs/color" },
+        "shadow": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "alpha": { "type": "integer", "minimum": 0, "maximum": 255 },
+            "offset": {
+              "type": "array",
+              "items": { "type": "integer" },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          }
+        },
+        "fonts": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "dir": { "type": ["string", "null"], "description": "相对字体路径的解析目录" },
+            "candidates": {
+              "type": "array",
+              "description": "按顺序探测的字体候选",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "bold": { "type": "string" },
+                  "regular": { "type": "string" }
+                },
+                "required": ["bold", "regular"]
+              }
+            }
+          }
+        },
+        "background": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "anchor": { "type": "string", "enum": ["left", "center", "right"] },
+            "paths": {
+              "type": "array",
+              "description": "相对底图目录的探测模式，{id} 会替换成卡片 id",
+              "items": { "type": "string" }
+            },
+            "fallback_gradient": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "top": { "$ref": "#/$defs/color" },
+                "bottom": { "$ref": "#/$defs/color" }
+              }
+            }
+          }
+        },
+        "slots": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "name": { "$ref": "#/$defs/slot" },
+            "level": { "$ref": "#/$defs/slot" },
+            "uid": { "$ref": "#/$defs/slot" },
+            "stat_value": { "$ref": "#/$defs/slot" },
+            "stat_label": { "$ref": "#/$defs/slot" }
+          }
+        },
+        "overlays": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "left_fade": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": { "type": "boolean" },
+                "color": { "$ref": "#/$defs/color" },
+                "stops": { "$ref": "#/$defs/stops" }
+              }
+            },
+            "bottom_fade": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": { "type": "boolean" },
+                "color": { "$ref": "#/$defs/color" },
+                "stops": { "$ref": "#/$defs/stops" }
+              }
+            },
+            "blur": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": { "type": "boolean" },
+                "radius": { "type": "integer", "minimum": 0 },
+                "region": {
+                  "type": "array",
+                  "description": "模糊区域 [x0, y0, x1, y1]；x1/y1 为 0 表示到边界",
+                  "items": { "type": "integer" },
+                  "minItems": 4,
+                  "maxItems": 4
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "stat": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "field": { "type": "string", "description": "要展示的字段名" },
+        "template": {
+          "type": "string",
+          "description": "组合多个字段，如 \"{ap_current} / {ap_max}\""
+        },
+        "label": { "type": "string", "description": "数字下方的小标签" },
+        "prefix": { "type": "string" },
+        "suffix": { "type": "string" },
+        "format": { "type": "string", "enum": ["number", "text"] },
+        "thousands": { "type": "boolean", "description": "数字是否加千分位" },
+        "hide_if_empty": { "type": "boolean", "description": "取不到值时是否隐藏该格" }
+      },
+      "required": ["label"],
+      "anyOf": [{ "required": ["field"] }, { "required": ["template"] }]
+    },
+    "card": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "enum": ["arknights", "endfield"],
+          "description": "游戏标识：决定数据来源，也是默认底图文件名 {id}-bg.* 的来源"
+        },
+        "title": { "type": "string", "description": "日志与摘要里显示的名字" },
+        "enabled": { "type": "boolean", "default": true },
+        "uid": {
+          "type": "string",
+          "description": "支持 ${VAR:-默认} 插值。明日方舟可留空，会自动取绑定列表里的默认角色"
+        },
+        "output": { "type": "string", "description": "产物路径，相对仓库根" },
+        "options": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "six_star_rarity_index": {
+              "type": "integer",
+              "description": "星级不低于该值即计入「六星」，默认 5"
+            },
+            "elite_two_phase": { "type": "integer", "description": "精英二所需的阶段，默认 2" }
+          }
+        },
+        "theme_overrides": { "$ref": "#/$defs/theme" },
+        "stats": {
+          "type": "array",
+          "description": "要展示的统计项，顺序即展示顺序",
+          "items": { "$ref": "#/$defs/stat" }
+        }
+      },
+      "required": ["id"]
+    }
+  }
+}

@@ -1,0 +1,61 @@
+# hoyocard 预设
+#
+# 这份文件的每一个值都逐项对齐了重构前的 render.py，因此默认配置的产出
+# 与旧版逐像素一致（见 tests/baseline/）。
+# 想自定义外观时，**不要改这个文件**，在你的配置里写 theme: 覆盖即可。
+
+canvas:
+  width: 1200
+  height: 400
+
+text_color: "#FFFFFF"
+
+shadow:
+  enabled: true
+  alpha: 200
+  offset: [2, 2]
+
+fonts:
+  candidates:
+    - { bold: fonts/NotoSansSC-Bold.otf, regular: fonts/NotoSansSC-Regular.otf }
+    - { bold: "C:/Windows/Fonts/msyhbd.ttc", regular: "C:/Windows/Fonts/msyh.ttc" }
+    - { bold: /usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc,
+        regular: /usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc }
+
+background:
+  # 底图按「底图目录 + 以下模式」依次探测，{id} 会替换成卡片的 id
+  anchor: right
+  paths:
+    - "{id}-bg.png"
+    - "{id}-bg.jpg"
+    - "{id}-bg.jpeg"
+    - "{id}-bg.webp"
+  fallback_gradient:
+    top: [30, 34, 40]
+    bottom: [12, 16, 22]
+
+slots:
+  # 左上角昵称
+  name:       { x: 40, y: 30, size: 40, bold: true, alpha: 255, empty: "未知" }
+  # 等级紧跟在昵称右侧；dy = 原实现里的 (NAME_SIZE - LEVEL_SIZE - 2)
+  level:      { size: 22, bold: true, alpha: 215, prefix: "Lv.", anchor: name_right, gap: 12, dy: 16 }
+  # 昵称下方的 UID
+  uid:        { x: 40, y: 88, size: 18, alpha: 180, prefix: "UID: " }
+  # 底部一排：大号数字 + 小标签，等宽列从左侧紧凑排列
+  stat_value: { x: 40, y: 282, size: 42, bold: true, alpha: 255, column_width: 152 }
+  stat_label: { x: 40, y: 342, size: 22, alpha: 185, column_width: 152 }
+
+overlays:
+  left_fade:
+    enabled: true
+    color: "#000000"
+    stops: [[0.0, 0.80], [0.42, 0.52], [0.75, 0.12], [1.0, 0.03]]
+  bottom_fade:
+    enabled: true
+    color: "#000000"
+    stops: [[0.0, 0.72], [0.20, 0.38], [0.52, 0.0]]
+  # 毛玻璃默认关闭；打开后文字区域会做局部模糊
+  blur:
+    enabled: false
+    radius: 12
+    region: [0, 0, 760, 400]

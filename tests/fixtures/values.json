@@ -1,0 +1,23 @@
+{
+  "_comment": "像素基线使用的固定输入值。昵称与 UID 均为占位数据，不含任何真实账号信息。",
+  "arknights": {
+    "nickname": "测试博士",
+    "level": 105,
+    "uid": "1000000001",
+    "register_days": 1602,
+    "operator_count": 242,
+    "six_star_count": 54,
+    "elite_two_count": 43,
+    "skin_count": 89
+  },
+  "endfield": {
+    "nickname": "测试管理员",
+    "level": 60,
+    "uid": "1000000002",
+    "play_days": 252,
+    "character_count": 31,
+    "weapon_count": 61,
+    "doc_count": 294,
+    "world_level": 7
+  }
+}

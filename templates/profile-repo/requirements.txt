@@ -1,0 +1,2 @@
+# 想锁定版本就把 @v1 换成具体的 tag 或 commit SHA
+hypergryph-profile-cards @ git+https://github.com/FelixFan-CN/hypergryph-profile-cards@v1

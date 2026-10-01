@@ -1,0 +1,12 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/FelixFan-CN/hypergryph-profile-cards/main/schema/profile-cards.schema.json
+#
+# 最小配置：只写要展示的字段，其余全部走内置预设
+
+version: 1
+
+cards:
+  - id: endfield
+    uid: "${ENDFIELD_UID:-}"
+    stats:
+      - { field: play_days,       label: 苏醒天数 }
+      - { field: character_count, label: 干员总数 }
