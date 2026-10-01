@@ -1,72 +1,74 @@
+**English** | [简体中文](README.zh-CN.md)
+
 # hypergryph-profile-cards
 
-把《明日方舟》与《明日方舟：终末地》的玩家数据渲染成个人主页名片，每天自动刷新。
+Render your *Arknights* and *Arknights: Endfield* player data into a profile card, refreshed every day.
 
-![示例](docs/example-arknights.png)
+![Example](docs/example-arknights.png)
 
-> 上图用的底图是仓库自带的合成测试图。换成你自己的游戏立绘后就是成品效果。
+> The background in the image above is a synthetic test image bundled with the repo. Swap in your own game artwork and you get the finished look.
 
-- **外观全部可配置**：画布尺寸、每个元素的坐标与字号、文字颜色与透明度、渐隐遮罩、投影、毛玻璃、字体、底图裁切锚点——都在一个 YAML 里，不用改代码。
-- **一次配置，每天自动更新**：GitHub Actions 定时拉数据、重新渲染、commit 回仓库。
-- **两种用法**：加 5 行 workflow 引用本 Action，或者把模板仓库复制一份自己改。
+- **Everything visual is configurable**: canvas size, the position and font size of every element, text color and opacity, fade overlays, drop shadow, blur, fonts, background crop anchor — all in a single YAML file, no code changes.
+- **Configure once, update daily**: GitHub Actions fetches the data, re-renders, and commits the result back to your repo on a schedule.
+- **Two ways to use it**: add a 5-line workflow that references this Action, or copy the template repo and make it your own.
 
-## 快速开始
+## Quick start
 
-**1. 建一个与你用户名同名的仓库**
+**1. Create a repo named after your username**
 
-仓库名必须是 `你的用户名/你的用户名`，GitHub 才会把它的 README 显示在你的主页上。
+The repo must be named `your-username/your-username` for GitHub to show its README on your profile.
 
-**2. 放入配置与底图**
+**2. Add the config and backgrounds**
 
 ```text
-你的仓库/
-├── profile-cards.yaml        # 配置（从 templates/profile-repo/ 复制）
+your-repo/
+├── profile-cards.yaml        # config (copy from templates/profile-repo/)
 ├── assets/
-│   ├── arknights-bg.png      # 明日方舟底图（自备，建议 3:1）
-│   └── endfield-bg.png       # 终末地底图（自备）
+│   ├── arknights-bg.png      # Arknights background (bring your own, 3:1 recommended)
+│   └── endfield-bg.png       # Endfield background (bring your own)
 └── .github/workflows/
     └── profile-cards.yml     # workflow
 ```
 
-**3. 打开 Actions 写权限**
+**3. Enable write permissions for Actions**
 
-仓库 Settings → Actions → General → Workflow permissions 选 **Read and write permissions**，否则 Action 无法把生成的名片提交回来。
+Repo Settings → Actions → General → Workflow permissions → select **Read and write permissions**, otherwise the Action cannot commit the generated cards back.
 
-然后手动触发一次 workflow，或在本地跑：
+Then trigger the workflow manually, or run it locally:
 
 ```bash
 pip install -r requirements.txt
 python -m hypergryph_profile_cards
 ```
 
-### 关于凭证
+### About credentials
 
-| 游戏 | 需要什么 | 怎么拿 |
+| Game | What you need | How to get it |
 | --- | --- | --- |
-| 明日方舟 | 仓库 Secret `SKLAND_TOKEN` | 见下方「获取森空岛 token」 |
-| 终末地 | 只要 UID，无需凭证 | 游戏内或森空岛绑定列表里的 9 位 UID |
+| Arknights | Repo secret `SKLAND_TOKEN` | See "Getting a Skland token" below |
+| Endfield | UID only, no credentials | The 9-digit UID in-game or in your Skland binding list |
 
-`SKLAND_TOKEN` 等同你的账号登录态，**只能放 GitHub Secrets，绝不要写进配置文件或提交到仓库**。
+`SKLAND_TOKEN` is equivalent to your account login session — **store it in GitHub Secrets only, never put it in a config file or commit it to your repo**.
 
 <details>
-<summary>获取森空岛 token</summary>
+<summary>Getting a Skland token</summary>
 
 ```bash
-python -m hypergryph_profile_cards.tools.get_token password   # 手机号 + 密码
-python -m hypergryph_profile_cards.tools.get_token code       # 手机号 + 短信验证码
+python -m hypergryph_profile_cards.tools.get_token password   # phone number + password
+python -m hypergryph_profile_cards.tools.get_token code       # phone number + SMS code
 ```
 
-拿到 token 后写进 Secret：
+Once you have the token, write it to a secret:
 
 ```bash
-gh secret set SKLAND_TOKEN --repo 你的用户名/你的用户名 --body "<token>"
+gh secret set SKLAND_TOKEN --repo your-username/your-username --body "<token>"
 ```
 
-重新登录森空岛会让旧 token 失效，届时重新执行一次即可。
+Signing in to Skland again invalidates the old token, so just re-run this when that happens.
 
 </details>
 
-## 用法一：引用本 Action
+## Usage 1: Reference this Action
 
 ```yaml
 name: Update profile cards
@@ -90,78 +92,78 @@ jobs:
           commit: true
 ```
 
-> `v1` 是浮动标签，始终指向最新的 v1.x。生产环境建议换成完整版本号（如 `v1.0.0`）或具体 commit SHA，避免上游更新带来的意外变化。
+> `v1` is a floating tag that always points to the latest v1.x. For production, pin a full version (e.g. `v1.0.0`) or a specific commit SHA to avoid surprises from upstream updates.
 
-**输入**
+**Inputs**
 
-| 输入 | 默认值 | 说明 |
+| Input | Default | Description |
 | --- | --- | --- |
-| `config` | `profile-cards.yaml` | 配置文件路径（相对 `root`） |
-| `root` | 工作区根目录 | 底图、产物与配置的解析基准 |
-| `assets-dir` | `assets` | 底图所在目录 |
-| `output-dir` | 空 | 产物目录；留空则沿用配置里的 `output` |
-| `python-version` | `3.12` | 使用的 Python 版本 |
-| `only` | 空 | 只渲染指定卡片 id，逗号分隔 |
-| `strict` | `false` | 任意一张卡失败就让步骤失败 |
-| `cache-fonts` | `true` | 缓存中文字体 |
-| `commit` | `false` | 由本 Action 提交产物 |
-| `commit-message` | `chore: update profile cards` | 提交信息 |
-| `commit-paths` | 空 | `git add` 的路径 |
+| `config` | `profile-cards.yaml` | Config file path (relative to `root`) |
+| `root` | Workspace root | Base directory used to resolve backgrounds, output and config |
+| `assets-dir` | `assets` | Directory containing backgrounds |
+| `output-dir` | empty | Output directory; when empty, the `output` from the config is used |
+| `python-version` | `3.12` | Python version to use |
+| `only` | empty | Render only the given card ids, comma-separated |
+| `strict` | `false` | Fail the step if any card fails |
+| `cache-fonts` | `true` | Cache the CJK font |
+| `commit` | `false` | Let this Action commit the output |
+| `commit-message` | `chore: update profile cards` | Commit message |
+| `commit-paths` | empty | Paths passed to `git add` |
 
-**输出**：`produced`、`failed`、`skipped`、`changed`、`summary`。
+**Outputs**: `produced`, `failed`, `skipped`, `changed`, `summary`.
 
-## 用法二：模板仓库
+## Usage 2: Template repo
 
-把 [`templates/profile-repo/`](templates/profile-repo/) 复制成你自己的仓库，`requirements.txt` 里已经写好了对本项目的依赖。想深度定制主题、锁定版本、或改动数据层时用这种方式。
+Copy [`templates/profile-repo/`](templates/profile-repo/) into your own repo — its `requirements.txt` already depends on this project. Use this route when you want to deeply customize the theme, pin a version, or change the data layer.
 
-## 配置
+## Configuration
 
-配置文件按以下顺序查找：`profile-cards.yaml` → `.yml` → `.json` → `config.json`。
+The config file is looked up in this order: `profile-cards.yaml` → `.yml` → `.json` → `config.json`.
 
-**想知道有哪些可配置项，不用翻文档**：
+**To see every available option without digging through the docs**:
 
 ```bash
 python -m hypergryph_profile_cards --print-config
 ```
 
-它会打印合并了预设之后的**完整生效配置**，复制回去改任意一处即可。想快速起步则用 `--init`。
+It prints the **fully merged, effective config** after presets are applied — copy it back and edit any part of it. For a quick start, use `--init`.
 
-### 卡片
+### Cards
 
 ```yaml
 version: 1
 
 cards:
-  - id: arknights              # 决定底图文件名（{id}-bg.*）
-    title: 明日方舟             # 日志与摘要里显示的名字
+  - id: arknights              # determines the background filename ({id}-bg.*)
+    title: Arknights           # name shown in logs and the summary
     enabled: true
-    uid: "${ARKNIGHTS_UID:-}"  # 支持环境变量插值；留空会自动取绑定列表里的默认角色
+    uid: "${ARKNIGHTS_UID:-}"  # supports env var interpolation; when empty, the default role from the binding list is used
     output: assets/arknights-card.png
     options:
-      six_star_rarity_index: 5 # 星级不低于该值即计入「六星」，改成 4 就是五星及以上
-      elite_two_phase: 2       # 精英二所需的阶段
-    theme_overrides: {}        # 只给这张卡覆盖主题，见「主题」
-    stats:                     # 顺序即展示顺序
-      - { field: register_days,   label: 入职天数 }
-      - { template: "{ap_current} / {ap_max}", label: 当前理智 }
+      six_star_rarity_index: 5 # rarity >= this value counts as a "6-star"; set it to 4 for 5-star and above
+      elite_two_phase: 2       # phase required for Elite 2
+    theme_overrides: {}        # override the theme for this card only, see "Theme"
+    stats:                     # order is the display order
+      - { field: register_days,   label: Days since joined }
+      - { template: "{ap_current} / {ap_max}", label: Current sanity }
 ```
 
-`stats` 每一项：
+Each entry in `stats`:
 
-| 键 | 说明 |
+| Key | Description |
 | --- | --- |
-| `field` | 可取字段名，见下表 |
-| `template` | 组合多个字段，如 `"{ap_current} / {ap_max}"`；只支持 `{字段}` 占位符 |
-| `label` | 数字下方的小标签 |
-| `prefix` / `suffix` | 前后缀，如 `suffix: " 名"` |
+| `field` | A field name, see the table below |
+| `template` | Combine multiple fields, e.g. `"{ap_current} / {ap_max}"`; only `{field}` placeholders are supported |
+| `label` | The small label under the number |
+| `prefix` / `suffix` | Prefix and suffix, e.g. `suffix: " ops"` |
 | `format` | `number` / `text` |
-| `thousands` | 数字是否加千分位 |
-| `hide_if_empty` | 取不到值时是否隐藏这一格，默认 `true` |
+| `thousands` | Whether to add thousands separators to numbers |
+| `hide_if_empty` | Whether to hide this cell when the value is missing; default `true` |
 
-### 可用字段
+### Available fields
 
 <details>
-<summary>明日方舟（<code>id: arknights</code>）</summary>
+<summary>Arknights (<code>id: arknights</code>)</summary>
 
 `nickname` `level` `uid` `register_days` `main_stage` `ap` `ap_current` `ap_max`
 `operator_count` `six_star_count` `elite_two_count` `skin_count` `furniture_count`
@@ -170,7 +172,7 @@ cards:
 </details>
 
 <details>
-<summary>终末地（<code>id: endfield</code>）</summary>
+<summary>Endfield (<code>id: endfield</code>)</summary>
 
 `nickname` `level` `world_level` `signature` `short_id` `uid` `play_days`
 `main_mission` `domain_level` `character_count` `weapon_count` `doc_count`
@@ -178,25 +180,25 @@ cards:
 
 </details>
 
-### 主题
+### Theme
 
-主题可以只写要改的键，其余继承预设。
+A theme only needs the keys you want to change; everything else inherits from the preset.
 
 ```yaml
 theme:
-  preset: hoyocard              # 目前内置这一个预设，等价于默认外观
+  preset: hoyocard              # currently the only built-in preset, equivalent to the default look
   canvas: { width: 1200, height: 400 }
-  text_color: "#FFFFFF"         # 也支持 [255, 255, 255]
+  text_color: "#FFFFFF"         # [255, 255, 255] is also accepted
   shadow: { enabled: true, alpha: 200, offset: [2, 2] }
   fonts:
     candidates:
       - { bold: fonts/NotoSansSC-Bold.otf, regular: fonts/NotoSansSC-Regular.otf }
   background:
-    anchor: right               # left | center | right，决定多余部分从哪边裁掉
+    anchor: right               # left | center | right — which side the overflow is cropped from
     paths: ["{id}-bg.png", "{id}-bg.jpg"]
     fallback_gradient: { top: [30, 34, 40], bottom: [12, 16, 22] }
   slots:
-    name:       { x: 40, y: 30, size: 40, bold: true, alpha: 255, empty: "未知" }
+    name:       { x: 40, y: 30, size: 40, bold: true, alpha: 255, empty: "Unknown" }
     level:      { size: 22, bold: true, alpha: 215, prefix: "Lv.", anchor: name_right, gap: 12, dy: 16 }
     uid:        { x: 40, y: 88, size: 18, alpha: 180, prefix: "UID: " }
     stat_value: { x: 40, y: 282, size: 42, bold: true, alpha: 255, column_width: 152 }
@@ -207,66 +209,66 @@ theme:
     blur:        { enabled: false, radius: 12, region: [0, 0, 760, 400] }
 ```
 
-几个要点：
+A few notes:
 
-- `slots` 里的 `x` / `y` 是左上角坐标；`alpha` 是文字不透明度（0-255）。
-- `level` 用 `anchor: name_right` 表示紧跟在昵称右侧，`gap` 是间距，`dy` 是相对昵称的纵向偏移。
-- `overlays.*.stops` 是 `[位置比例, 不透明度]` 列表。`left_fade` 从左边 0 到右边 1；`bottom_fade` 从底部 0 到顶部 1。
-- `blur` 是毛玻璃，默认关闭。打开后只对 `region` 区域做高斯模糊，其余部分保持清晰。
-- `background.anchor` 决定底图比例不是 3:1 时裁哪边。主体在右侧就用 `right`。
-- 每张卡可以用 `theme_overrides` 单独覆盖任意主题键。
+- `x` / `y` inside `slots` are the top-left coordinates; `alpha` is the text opacity (0-255).
+- `level` uses `anchor: name_right` to sit right after the nickname; `gap` is the spacing and `dy` is the vertical offset relative to the nickname.
+- `overlays.*.stops` is a list of `[position ratio, opacity]`. `left_fade` runs from 0 at the left edge to 1 at the right edge; `bottom_fade` runs from 0 at the bottom to 1 at the top.
+- `blur` is a frosted-glass effect, off by default. When enabled, only the `region` is blurred and the rest stays sharp.
+- `background.anchor` decides which side is cropped when the background is not 3:1. Use `right` when the subject is on the right.
+- Each card can override any theme key via `theme_overrides`.
 
-更多示例见 [`examples/`](examples/)：`minimal` 是 6 行起步配置，`advanced` 演示了改画布、换配色、关遮罩、开毛玻璃、组合字段、按卡覆盖主题。
+More examples live in [`examples/`](examples/): `minimal` is a 6-line starter config, and `advanced` demonstrates changing the canvas, swapping colors, disabling overlays, enabling blur, combining fields, and overriding the theme per card.
 
-## 支持的游戏
+## Supported games
 
-| id | 游戏 | 数据来源 | 需要凭证 |
+| id | Game | Data source | Credentials |
 | --- | --- | --- | --- |
-| `arknights` | 明日方舟 | 森空岛（非官方接口） | `SKLAND_TOKEN` |
-| `endfield` | 明日方舟：终末地 | [Enka.Network](https://enka.network/?ef) | 无，只要 UID |
+| `arknights` | Arknights | Skland (unofficial API) | `SKLAND_TOKEN` |
+| `endfield` | Arknights: Endfield | [Enka.Network](https://enka.network/?ef) | None, UID only |
 
-目前这两款是内置的。要接入别的游戏需要改数据层代码——`src/hypergryph_profile_cards/fetch/` 下每个模块负责一款游戏，新增模块后在 `orchestrator.py` 的 `COLLECTORS` 里登记即可；外观部分不需要动。
+These two are built in. Adding another game means changing the data layer — each module under `src/hypergryph_profile_cards/fetch/` handles one game, and a new module just needs to be registered in `COLLECTORS` in `orchestrator.py`; the visual layer does not need to change.
 
-## 故障排查
+## Troubleshooting
 
-| 现象 | 原因与处理 |
+| Symptom | Cause and fix |
 | --- | --- |
-| 日志出现「未找到底图」，卡片变成纯色 | `assets/{id}-bg.png` 不存在或文件名不对。底图必须提交进仓库，CI 才能取到 |
-| 中文显示成方块或报找不到字体 | 字体没准备好。本地可删掉 `theme.fonts.candidates` 里不存在的项，或按报错提示下载思源黑体到 `fonts/` |
-| 明日方舟那张显示「跳过：未配置 SKLAND_TOKEN」 | Secret 没设置或名字不对 |
-| 森空岛返回「设备信息无效」 | 签名相关的可变常量需要更新，见 `skland/client.py` 顶部注释 |
-| Enka 返回 429 | 第三方服务限流，稍后重试即可；只有该张卡受影响 |
-| Action 跑完但主页图片没变 | 检查 Settings → Actions → General 是否给了 Read and write 权限 |
+| Logs say "background not found" and the card becomes a solid color | `assets/{id}-bg.png` is missing or misnamed. The background must be committed to the repo for CI to find it |
+| Chinese text renders as boxes, or a missing-font error appears | The font is not ready. Locally, remove the entries in `theme.fonts.candidates` that do not exist, or download Noto Sans SC into `fonts/` as the error suggests |
+| The Arknights card says "skipped: SKLAND_TOKEN not configured" | The secret is missing or misnamed |
+| Skland returns "invalid device information" | The mutable signing constants need updating; see the comment at the top of `skland/client.py` |
+| Enka returns 429 | Third-party rate limiting — retry later; only that one card is affected |
+| The Action ran but the profile image did not change | Check that Settings → Actions → General grants Read and write permissions |
 
 ## FAQ
 
-**会被封号吗？**
-本项目只读取公开的个人资料数据，不涉及登录游戏、不改动任何账号状态。但它使用的是非官方接口，风险请自行判断。
+**Will I get banned?**
+This project only reads public profile data; it never logs into the game or changes any account state. It does use unofficial APIs, so judge the risk yourself.
 
-**能不能不提交到仓库？**
-可以。把 `commit` 留空或设为 `false`，然后用 `output-dir` 指定别的路径，自己处理产物。
+**Can I skip committing to the repo?**
+Yes. Leave `commit` empty or set it to `false`, then point `output-dir` somewhere else and handle the output yourself.
 
-**能用私有仓库吗？**
-可以，但主页 README 必须是公开仓库才能显示，所以通常做法是公开仓库放 README 与图片。
+**Can I use a private repo?**
+Yes, but the profile README must live in a public repo to be shown, so the usual setup is a public repo holding the README and images.
 
-**底图有什么要求？**
-建议 3:1（如 1200×400），主体放在右侧。其它比例也能用，会按 `background.anchor` 裁切。
+**What are the background requirements?**
+3:1 (e.g. 1200×400) is recommended, with the subject on the right. Other ratios work too — they are cropped according to `background.anchor`.
 
-## 开发
+## Development
 
 ```bash
 pip install -e ".[dev]"
 PYTHONPATH=src python -m pytest
 ```
 
-`tests/baseline/` 里保存了重构前的像素基线，用来保证默认外观不被意外改坏。该比对只在装有微软雅黑的机器上执行（字体栅格化跨平台不一致），其余断言跨平台通用。
+`tests/baseline/` holds the pixel baseline from before the refactor, to make sure the default look is never broken by accident. That comparison only runs on machines with Microsoft YaHei installed (font rasterization differs across platforms); the remaining assertions are cross-platform.
 
-## 许可与声明
+## License and notices
 
-代码以 [MIT](LICENSE) 授权。
+The code is licensed under [MIT](LICENSE).
 
-**本项目不包含任何游戏素材。** 示例图与测试底图均由 `tests/make_fixtures.py` 程序化生成。《明日方舟》《明日方舟：终末地》及其角色立绘、图标、名称的版权归鹰角网络（Hypergryph）及相关权利人所有，MIT 授权不覆盖这些内容。若你在自己的仓库里使用官方素材，请自行判断并承担相应风险。
+**This project bundles no game assets.** The example images and test backgrounds are generated programmatically by `tests/make_fixtures.py`. *Arknights*, *Arknights: Endfield*, and their character artwork, icons and names are the property of Hypergryph and related rights holders; the MIT license does not cover them. If you use official assets in your own repo, judge the risk yourself and bear it.
 
-**接口可用性**：森空岛为鹰角非公开接口，签名算法与字段可能随时变更；Enka.Network 是第三方社区服务，可能限流、变更或停止服务。本项目不提供可用性承诺。
+**API availability**: Skland is an unofficial Hypergryph API whose signing algorithm and fields may change at any time; Enka.Network is a third-party community service that may be rate-limited, changed, or shut down. This project makes no availability guarantees.
 
-**账号安全**：`SKLAND_TOKEN` 等同登录态，请只放在 GitHub Secrets 中。因接口变更、限流或账号处置造成的任何后果由使用者自负。
+**Account safety**: `SKLAND_TOKEN` is equivalent to a login session — keep it in GitHub Secrets only. Any consequences arising from API changes, rate limiting, or account actions are the user's own responsibility.
