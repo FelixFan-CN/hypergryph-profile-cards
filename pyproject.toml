@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hypergryph-profile-cards"
-version = "1.0.0"
+version = "1.0.1"
 description = "把《明日方舟》《明日方舟：终末地》的玩家数据渲染成可高度自定义的个人主页名片"
 readme = "README.md"
 requires-python = ">=3.10"

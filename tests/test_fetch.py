@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import time
+
 from hypergryph_profile_cards.fetch import summarize_arknights, summarize_endfield
 
 
@@ -86,6 +88,44 @@ def test_arknights_zero_counts_become_none():
     flat = summarize_arknights(payload)
     assert flat["six_star_count"] is None
     assert flat["elite_two_count"] is None
+
+
+def test_arknights_ap_recovers_from_last_add_time():
+    """接口给的 current 停在 lastApAddTime 那一刻，要按每 6 分钟 +1 推算到此刻。"""
+    payload = _arknights_payload()
+    payload["status"]["ap"] = {
+        "current": 10,
+        "max": 207,
+        "lastApAddTime": int(time.time()) - 3630,  # 约 10 个恢复周期，留 30 秒余量避免边界抖动
+    }
+    flat = summarize_arknights(payload)
+    assert flat["ap_current"] == 20
+    assert flat["ap"] == "20 / 207"
+
+
+def test_arknights_ap_stops_at_max():
+    """回满即停止增长，推算结果不会越过上限。"""
+    payload = _arknights_payload()
+    payload["status"]["ap"] = {
+        "current": 206,
+        "max": 207,
+        "lastApAddTime": int(time.time()) - 3630,
+    }
+    flat = summarize_arknights(payload)
+    assert flat["ap_current"] == 207
+
+
+def test_arknights_ap_overflow_is_kept():
+    """理智恢复药/源石会把理智顶到上限之上：既不能压回上限，也不能再加回复。"""
+    payload = _arknights_payload()
+    payload["status"]["ap"] = {
+        "current": 300,
+        "max": 207,
+        "lastApAddTime": int(time.time()) - 3630,
+    }
+    flat = summarize_arknights(payload)
+    assert flat["ap_current"] == 300
+    assert flat["ap"] == "300 / 207"
 
 
 def _endfield_payload():
